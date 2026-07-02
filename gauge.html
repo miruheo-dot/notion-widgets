@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>분기 진행률</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: transparent; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+    padding: 12px 8px;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .row:last-child { margin-bottom: 0; }
+  .track {
+    flex: 1;
+    height: 30px;
+    border: 1.6px solid #37352f;
+    border-radius: 15px;
+    background: #ffffff;
+    padding: 4px;
+    overflow: hidden;
+  }
+  .fill {
+    height: 100%;
+    min-width: 12px;
+    background: #37352f;
+    border-radius: 9px;
+    width: 0%;
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .fill.zero { min-width: 0; width: 0; }
+  .label {
+    flex: 0 0 auto;
+    width: 96px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #37352f;
+    white-space: nowrap;
+  }
+  .label .pct { font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+  function render(items) {
+    var app = document.getElementById('app');
+    app.innerHTML = '';
+    items.forEach(function (it) {
+      var v = Math.max(0, Math.min(100, Number(it.value) || 0));
+      var row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML =
+        '<div class="track"><div class="fill' + (v === 0 ? ' zero' : '') + '"></div></div>' +
+        '<div class="label">' + it.label + ': <span class="pct">' + v + '%</span></div>';
+      app.appendChild(row);
+      var fill = row.querySelector('.fill');
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { fill.style.width = v + '%'; });
+      });
+    });
+  }
+
+  // 1) URL 파라미터 우선: ?labels=2분기,3분기,4분기&values=33,0,0
+  var q = new URLSearchParams(location.search);
+  if (q.get('values')) {
+    var labels = (q.get('labels') || '').split(',');
+    var values = q.get('values').split(',');
+    render(values.map(function (v, i) {
+      return { label: labels[i] || ('항목 ' + (i + 1)), value: v };
+    }));
+  } else {
+    // 2) 기본: 같은 저장소의 values.json (캐시 무효화)
+    fetch('values.json?t=' + Date.now())
+      .then(function (r) { return r.json(); })
+      .then(function (d) { render(d.items); })
+      .catch(function () { render([{ label: '로드 실패', value: 0 }]); });
+  }
+</script>
+</body>
+</html>
