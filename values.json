@@ -2,7 +2,7 @@
   "updated": "2026-07-02",
   "rule": "value = (완료+하차) / 전체 * 100, 시작 전·진행 중·보류는 미집계",
   "items": [
-    { "label": "2분기", "value": 8, "done": 1, "total": 13 },
+    { "label": "2분기", "value": 0, "done": 0, "total": 13 },
     { "label": "3분기", "value": 0, "done": 0, "total": 0 },
     { "label": "4분기", "value": 0, "done": 0, "total": 0 }
   ]
